@@ -1,7 +1,9 @@
 # mandelbrot
 
 An algorithm that draws an image of the mandelbrot set. 
+
 Inspired by [Coding Train](https://www.youtube.com/watch?v=6z7GQewK-Ks).
+
 More information on mandelbrot sets: [Wikipedia](https://en.wikipedia.org/wiki/Mandelbrot_set)
 
 ## How to use this tool
