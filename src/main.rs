@@ -1,19 +1,29 @@
 use image::{Rgb, RgbImage};
-const WIDTH: u32 = 1080;
-const HEIGHT: u32 = 1080;
-const FRAMES: u32 = 250;
-fn main() {
-    let x_start = -0.9335;
-    let y_start = 0.2432;
-    let x_end = -0.9335;
-    let y_end = 0.2432;
 
-    let zoom_start = 0.01;
-    let zoom_end = 0.000001;
+struct RGB {
+    red: u8,
+    green: u8,
+    blue: u8,
+}
+
+const WIDTH: u32 = 5000;            //Image width
+const HEIGHT: u32 = 5000;           //Image height
+const FRAMES: u32 = 1;              //Amount of frames generated, set to 1 to render a single image
+const COLORFUL: bool = false;       //Set colorful mode
+
+fn main() {
+    let x_start = -0.9335;     //Coordinate x on the mandelbrot set where the zoom starts
+    let y_start = 0.2432;      //Coordinate y on the mandelbrot set where the zoom starts
+    let x_end = x_start;       //Coordinate x on the mandelbrot set where the zoom ends
+    let y_end = y_start;       //Coordinate y on the mandelbrot set where the zoom ends
+
+    let zoom_start = 0.000001; //Zoom factor at the start, the smaller the number, the closer it is
+    let zoom_end = zoom_start; //Zoom factor at the end
 
     generate_zoom(FRAMES, x_start, y_start, x_end, y_end, zoom_start, zoom_end);
 }
 
+///Function that generates a series of images, from a start to an end point with zooms
 fn generate_zoom(
     frames: u32,
     x_start: f64,
@@ -46,14 +56,15 @@ fn generate_zoom(
     }
 }
 
+///Generates an image of the mandelbrot set
 fn generate_image(x_min: f64, x_max: f64, y_min: f64, y_max: f64, img_number: u32) {
     let mut img = RgbImage::new(WIDTH, HEIGHT);
+    let mut rgb: RGB = RGB { red: 0, green: 0, blue: 0 };
     for x in 0..WIDTH {
         for y in 0..HEIGHT {
             let mut a: f64 = map(x as f64, 0.0, WIDTH as f64, x_min, x_max);
             let mut b: f64 = map(y as f64, 0.0, HEIGHT as f64, y_min, y_max);
             let mut n = 0;
-            let mut brightness: u8;
 
             let a_start = a;
             let b_start = b;
@@ -65,18 +76,27 @@ fn generate_image(x_min: f64, x_max: f64, y_min: f64, y_max: f64, img_number: u3
                 a = aa + a_start;
                 b = bb + b_start;
 
-                if (a + b).abs() as u32 > 32 {
+                if (a + b).abs() > 16.0 {
                     break;
                 }
                 n += 1;
             }
-            brightness = n;
 
-            if n == 255 {
-                brightness = 0;
+            if COLORFUL {
+                rgb = hsl_to_rgb(n as f32 / 255.0, 1.0, 0.5);
+            } else if !COLORFUL {
+                rgb.red = n;
+                rgb.green = n;
+                rgb.blue = n;
             }
 
-            img.put_pixel(x, y, Rgb([brightness, brightness, brightness]));
+            if n == 255 {
+                rgb.red = 0;
+                rgb.green = 0;
+                rgb.blue = 0;
+            }
+
+            img.put_pixel(x, y, Rgb([rgb.red, rgb.green, rgb.blue]));
         }
     }
     let outputpath: String =
@@ -84,6 +104,53 @@ fn generate_image(x_min: f64, x_max: f64, y_min: f64, y_max: f64, img_number: u3
     img.save(outputpath).expect("Writing image to png");
 }
 
+///Maps min and max values to different min and max values
 fn map(x: f64, min: f64, max: f64, a: f64, b: f64) -> f64 {
     (x - min) / (max - min) * (b - a) + a
+}
+
+///Generates RGB values from HSL values
+fn hsl_to_rgb(hue: f32, saturation: f32, luminance: f32) -> RGB {
+    let mut rgb: RGB = RGB {
+        red: 0,
+        green: 0,
+        blue: 0,
+    };
+
+    let c = (1.0 - (2.0 * luminance - 1.0).abs()) * saturation;
+    let h = hue * 6.0;
+    let x = c * (1.0 - (h % 2.0 - 1.0).abs());
+    let m = luminance - (c / 2.0);
+    let mut r = 0.0;
+    let mut g = 0.0;
+    let mut b = 0.0;
+    if 0.0 <= h && h <= 1.0 {
+        r = c;
+        g = x;
+        b = 0.0;
+    } else if 1.0 < h && h <= 2.0 {
+        r = x;
+        g = c;
+        b = 0.0;
+    } else if 2.0 < h && h <= 3.0 {
+        r = 0.0;
+        g = c;
+        b = x;
+    } else if 3.0 < h && h <= 4.0 {
+        r = 0.0;
+        g = x;
+        b = c;
+    } else if 4.0 < h && h <= 5.0 {
+        r = x;
+        g = 0.0;
+        b = c;
+    } else if 5.0 < h && h <= 6.0 {
+        r = c;
+        g = 0.0;
+        b = x;
+    }
+    rgb.red = ((r + m) * 255.0) as u8;
+    rgb.green = ((g + m) * 255.0) as u8;
+    rgb.blue = ((b + m) * 255.0) as u8;
+    rgb
 }
