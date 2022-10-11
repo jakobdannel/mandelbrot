@@ -18,3 +18,5 @@ More information on mandelbrot sets: [Wikipedia](https://en.wikipedia.org/wiki/M
 
 ![Example image](/examples/example1.png)
 ![Example image](/examples/example2.png)
+![Example image](/examples/example3.png)
+![Example image](/examples/example4.png)
