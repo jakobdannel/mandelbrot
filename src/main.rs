@@ -12,13 +12,13 @@ const FRAMES: u32 = 1;              //Amount of frames generated, set to 1 to re
 const COLORFUL: bool = false;       //Set colorful mode
 
 fn main() {
-    let x_start = -0.9335;     //Coordinate x on the mandelbrot set where the zoom starts
-    let y_start = 0.2432;      //Coordinate y on the mandelbrot set where the zoom starts
-    let x_end = x_start;       //Coordinate x on the mandelbrot set where the zoom ends
-    let y_end = y_start;       //Coordinate y on the mandelbrot set where the zoom ends
+    let x_start = -0.5;         //Coordinate x on the mandelbrot set where the zoom starts
+    let y_start = 0.0;          //Coordinate y on the mandelbrot set where the zoom starts
+    let x_end = x_start;        //Coordinate x on the mandelbrot set where the zoom ends
+    let y_end = y_start;        //Coordinate y on the mandelbrot set where the zoom ends
 
-    let zoom_start = 0.000001; //Zoom factor at the start, the smaller the number, the closer it is
-    let zoom_end = zoom_start; //Zoom factor at the end
+    let zoom_start = 1.0;       //Zoom factor at the start, the smaller the number, the closer it is
+    let zoom_end = zoom_start;  //Zoom factor at the end
 
     generate_zoom(FRAMES, x_start, y_start, x_end, y_end, zoom_start, zoom_end);
 }
