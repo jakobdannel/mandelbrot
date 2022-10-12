@@ -1,5 +1,6 @@
 use std::fs;
 
+use clap::Parser;
 use image::{Rgb, RgbImage};
 
 struct RGB {
@@ -8,12 +9,21 @@ struct RGB {
     blue: u8,
 }
 
-const WIDTH: u32 = 5000; //Image width
-const HEIGHT: u32 = 5000; //Image height
-const FRAMES: u32 = 1; //Amount of frames generated, set to 1 to render a single image
-const COLORFUL: bool = true; //Set colorful mode
+#[derive(Parser)]
+struct Args {
+    #[arg(long, short, default_value="5000")]
+    width: u32,
+    #[arg(long, short, default_value="5000")]
+    height: u32,
+    #[arg(long, short, default_value="1")]
+    frames: usize,
+    #[arg(long, short, default_value="false")]
+    colorful: bool,
+}
 
 fn main() {
+    let args = Args::parse();
+
     let x_start = -0.5; //Coordinate x on the mandelbrot set where the zoom starts
     let y_start = 0.0; //Coordinate y on the mandelbrot set where the zoom starts
     let x_end = x_start; //Coordinate x on the mandelbrot set where the zoom ends
@@ -22,12 +32,12 @@ fn main() {
     let zoom_start = 1.0; //Zoom factor at the start, the smaller the number, the closer it is
     let zoom_end = zoom_start; //Zoom factor at the end
 
-    generate_zoom(FRAMES, x_start, y_start, x_end, y_end, zoom_start, zoom_end);
+    generate_zoom(&args, x_start, y_start, x_end, y_end, zoom_start, zoom_end);
 }
 
 ///Function that generates a series of images, from a start to an end point with zooms
 fn generate_zoom(
-    frames: u32,
+    args: &Args,
     x_start: f64,
     y_start: f64,
     x_end: f64,
@@ -35,6 +45,8 @@ fn generate_zoom(
     zoom_start: f64,
     zoom_end: f64,
 ) {
+    let frames = args.frames;
+
     let x_min_start: f64 = x_start - zoom_start;
     let x_max_start: f64 = x_start + zoom_start;
     let y_min_start: f64 = y_start - zoom_start;
@@ -54,24 +66,26 @@ fn generate_zoom(
         y_min = y_min_start - ((i as f64 / frames as f64) * (y_min_start - y_min_end));
         y_max = y_max_start - ((i as f64 / frames as f64) * (y_max_start - y_max_end));
         println!("{}", i);
-        generate_image(x_min, x_max, y_min, y_max, i);
+        generate_image(args, x_min, x_max, y_min, y_max, i);
     }
 }
 
 ///Generates an image of the mandelbrot set
-fn generate_image(x_min: f64, x_max: f64, y_min: f64, y_max: f64, img_number: u32) {
+fn generate_image(args: &Args, x_min: f64, x_max: f64, y_min: f64, y_max: f64, img_number: usize) {
+    let Args { width, height, colorful, .. } = *args;
+
     fs::create_dir_all("./output/").expect("Creating output folder");
 
-    let mut img = RgbImage::new(WIDTH, HEIGHT);
+    let mut img = RgbImage::new(width, height);
     let mut rgb: RGB = RGB {
         red: 0,
         green: 0,
         blue: 0,
     };
-    for x in 0..WIDTH {
-        for y in 0..HEIGHT {
-            let mut a: f64 = map(x as f64, 0.0, WIDTH as f64, x_min, x_max);
-            let mut b: f64 = map(y as f64, 0.0, HEIGHT as f64, y_min, y_max);
+    for x in 0..width {
+        for y in 0..height {
+            let mut a: f64 = map(x as f64, 0.0, width as f64, x_min, x_max);
+            let mut b: f64 = map(y as f64, 0.0, height as f64, y_min, y_max);
             let mut n = 0;
 
             let a_start = a;
@@ -97,19 +111,18 @@ fn generate_image(x_min: f64, x_max: f64, y_min: f64, y_max: f64, img_number: u3
                 n = 255;
             }
 
-            if COLORFUL {
+            if n == 255 {
+                rgb.red = 0;
+                rgb.green = 0;
+                rgb.blue = 0;
+            } else if colorful {
                 rgb = hsl_to_rgb(n as f32 / 255.0, 1.0, 0.5);
-            } else if !COLORFUL {
+            } else {
                 rgb.red = n;
                 rgb.green = n;
                 rgb.blue = n;
             }
 
-            if n == 255 {
-                rgb.red = 0;
-                rgb.green = 0;
-                rgb.blue = 0;
-            }
 
             img.put_pixel(x, y, Rgb([rgb.red, rgb.green, rgb.blue]));
         }
