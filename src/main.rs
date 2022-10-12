@@ -115,19 +115,12 @@ fn map(x: f64, min: f64, max: f64, a: f64, b: f64) -> f64 {
 
 ///Generates RGB values from HSL values
 fn hsl_to_rgb(hue: f32, saturation: f32, luminance: f32) -> RGB {
-    let mut rgb: RGB = RGB {
-        red: 0,
-        green: 0,
-        blue: 0,
-    };
-
     let c = (1.0 - (2.0 * luminance - 1.0).abs()) * saturation;
     let h = hue * 6.0;
     let x = c * (1.0 - (h % 2.0 - 1.0).abs());
     let m = luminance - (c / 2.0);
-    let mut r = 0.0;
-    let mut g = 0.0;
-    let mut b = 0.0;
+
+    let (r, g, b);
     if 0.0 <= h && h <= 1.0 {
         r = c;
         g = x;
@@ -152,9 +145,13 @@ fn hsl_to_rgb(hue: f32, saturation: f32, luminance: f32) -> RGB {
         r = c;
         g = 0.0;
         b = x;
+    } else {
+        panic!("bad HSL");
+    };
+
+    RGB {
+        red: ((r + m) * 255.0) as u8,
+        green: ((g + m) * 255.0) as u8,
+        blue: ((b + m) * 255.0) as u8,
     }
-    rgb.red = ((r + m) * 255.0) as u8;
-    rgb.green = ((g + m) * 255.0) as u8;
-    rgb.blue = ((b + m) * 255.0) as u8;
-    rgb
 }
