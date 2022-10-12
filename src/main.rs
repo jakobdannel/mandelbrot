@@ -8,19 +8,19 @@ struct RGB {
     blue: u8,
 }
 
-const WIDTH: u32 = 5000;            //Image width
-const HEIGHT: u32 = 5000;           //Image height
-const FRAMES: u32 = 1;              //Amount of frames generated, set to 1 to render a single image
-const COLORFUL: bool = false;       //Set colorful mode
+const WIDTH: u32 = 5000; //Image width
+const HEIGHT: u32 = 5000; //Image height
+const FRAMES: u32 = 1; //Amount of frames generated, set to 1 to render a single image
+const COLORFUL: bool = false; //Set colorful mode
 
 fn main() {
-    let x_start = -0.5;         //Coordinate x on the mandelbrot set where the zoom starts
-    let y_start = 0.0;          //Coordinate y on the mandelbrot set where the zoom starts
-    let x_end = x_start;        //Coordinate x on the mandelbrot set where the zoom ends
-    let y_end = y_start;        //Coordinate y on the mandelbrot set where the zoom ends
+    let x_start = -0.5; //Coordinate x on the mandelbrot set where the zoom starts
+    let y_start = 0.0; //Coordinate y on the mandelbrot set where the zoom starts
+    let x_end = x_start; //Coordinate x on the mandelbrot set where the zoom ends
+    let y_end = y_start; //Coordinate y on the mandelbrot set where the zoom ends
 
-    let zoom_start = 1.0;       //Zoom factor at the start, the smaller the number, the closer it is
-    let zoom_end = zoom_start;  //Zoom factor at the end
+    let zoom_start = 1.0; //Zoom factor at the start, the smaller the number, the closer it is
+    let zoom_end = zoom_start; //Zoom factor at the end
 
     generate_zoom(FRAMES, x_start, y_start, x_end, y_end, zoom_start, zoom_end);
 }
@@ -63,7 +63,11 @@ fn generate_image(x_min: f64, x_max: f64, y_min: f64, y_max: f64, img_number: u3
     fs::create_dir_all("./output/").expect("Creating output folder");
 
     let mut img = RgbImage::new(WIDTH, HEIGHT);
-    let mut rgb: RGB = RGB { red: 0, green: 0, blue: 0 };
+    let mut rgb: RGB = RGB {
+        red: 0,
+        green: 0,
+        blue: 0,
+    };
     for x in 0..WIDTH {
         for y in 0..HEIGHT {
             let mut a: f64 = map(x as f64, 0.0, WIDTH as f64, x_min, x_max);
@@ -72,18 +76,23 @@ fn generate_image(x_min: f64, x_max: f64, y_min: f64, y_max: f64, img_number: u3
 
             let a_start = a;
             let b_start = b;
+            let c_abs = (a.powf(2.0) + b.powf(2.0)).sqrt();
 
-            while n < 255 {
-                let aa = a * a - b * b;
-                let bb = 2.0 * a * b;
+            if !((a + 1.0).powf(2.0) * b.powf(2.0) < 0.0625)
+                || !(c_abs.powf(2.0) * (8.0 * c_abs.powf(2.0) - 3.0) <= 0.09375 - a)
+            {
+                while n < 255 {
+                    let aa = a * a - b * b;
+                    let bb = 2.0 * a * b;
 
-                a = aa + a_start;
-                b = bb + b_start;
+                    a = aa + a_start;
+                    b = bb + b_start;
 
-                if (a + b).abs() > 16.0 {
-                    break;
+                    if (a + b).abs() > 16.0 {
+                        break;
+                    }
+                    n += 1;
                 }
-                n += 1;
             }
 
             if COLORFUL {
@@ -99,7 +108,7 @@ fn generate_image(x_min: f64, x_max: f64, y_min: f64, y_max: f64, img_number: u3
                 rgb.green = 0;
                 rgb.blue = 0;
             }
-
+            
             img.put_pixel(x, y, Rgb([rgb.red, rgb.green, rgb.blue]));
         }
     }
