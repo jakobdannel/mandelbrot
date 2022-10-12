@@ -11,7 +11,7 @@ struct RGB {
 const WIDTH: u32 = 5000; //Image width
 const HEIGHT: u32 = 5000; //Image height
 const FRAMES: u32 = 1; //Amount of frames generated, set to 1 to render a single image
-const COLORFUL: bool = false; //Set colorful mode
+const COLORFUL: bool = true; //Set colorful mode
 
 fn main() {
     let x_start = -0.5; //Coordinate x on the mandelbrot set where the zoom starts
@@ -93,6 +93,8 @@ fn generate_image(x_min: f64, x_max: f64, y_min: f64, y_max: f64, img_number: u3
                     }
                     n += 1;
                 }
+            } else {
+                n = 255;
             }
 
             if COLORFUL {
@@ -108,7 +110,7 @@ fn generate_image(x_min: f64, x_max: f64, y_min: f64, y_max: f64, img_number: u3
                 rgb.green = 0;
                 rgb.blue = 0;
             }
-            
+
             img.put_pixel(x, y, Rgb([rgb.red, rgb.green, rgb.blue]));
         }
     }
