@@ -1,3 +1,5 @@
+use std::fs;
+
 use image::{Rgb, RgbImage};
 
 struct RGB {
@@ -58,6 +60,8 @@ fn generate_zoom(
 
 ///Generates an image of the mandelbrot set
 fn generate_image(x_min: f64, x_max: f64, y_min: f64, y_max: f64, img_number: u32) {
+    fs::create_dir_all("./output/").expect("Creating output folder");
+
     let mut img = RgbImage::new(WIDTH, HEIGHT);
     let mut rgb: RGB = RGB { red: 0, green: 0, blue: 0 };
     for x in 0..WIDTH {
