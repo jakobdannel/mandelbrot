@@ -2,6 +2,7 @@ use std::fs;
 
 use clap::Parser;
 use image::RgbImage;
+use rayon::prelude::*;
 
 #[derive(Clone, Copy)]
 struct Rgb {
@@ -88,14 +89,10 @@ fn generate_image(args: &Args, x_min: f64, x_max: f64, y_min: f64, y_max: f64, i
 
     fs::create_dir_all("./output/").expect("Creating output folder");
 
-    let mut img = RgbImage::new(width, height);
-    let mut rgb: Rgb = Rgb {
-        red: 0,
-        green: 0,
-        blue: 0,
-    };
-    for x in 0..width {
-        for y in 0..height {
+    let pixels: Vec<((u32, u32), Rgb)> = (0..height)
+        .into_par_iter()
+        .flat_map(|h| (0..width).into_par_iter().map(move |w| (w, h)))
+        .map(|(x, y)| {
             let mut a: f64 = map(x as f64, 0.0, width as f64, x_min, x_max);
             let mut b: f64 = map(y as f64, 0.0, height as f64, y_min, y_max);
             let mut n = 0;
@@ -123,20 +120,28 @@ fn generate_image(args: &Args, x_min: f64, x_max: f64, y_min: f64, y_max: f64, i
                 n = 255;
             }
 
-            if n == 255 {
-                rgb.red = 0;
-                rgb.green = 0;
-                rgb.blue = 0;
+            let rgb = if n == 255 {
+                Rgb {
+                    red: 0,
+                    green: 0,
+                    blue: 0,
+                }
             } else if colorful {
-                rgb = hsl_to_rgb(n as f32 / 255.0, 1.0, 0.5);
+                hsl_to_rgb(n as f32 / 255.0, 1.0, 0.5)
             } else {
-                rgb.red = n;
-                rgb.green = n;
-                rgb.blue = n;
-            }
+                Rgb {
+                    red: n,
+                    green: n,
+                    blue: n,
+                }
+            };
+            ((x, y), rgb)
+        })
+        .collect();
 
-            img.put_pixel(x, y, rgb.into());
-        }
+    let mut img = RgbImage::new(width, height);
+    for ((x, y), rgb) in pixels {
+        img.put_pixel(x, y, rgb.into());
     }
     let outputpath: String = format!("./output/{}.png", img_number);
     img.save(outputpath).expect("Writing image to png");
