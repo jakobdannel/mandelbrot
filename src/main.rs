@@ -115,46 +115,25 @@ fn map(x: f64, min: f64, max: f64, a: f64, b: f64) -> f64 {
 
 ///Generates RGB values from HSL values
 fn hsl_to_rgb(hue: f32, saturation: f32, luminance: f32) -> RGB {
-    let mut rgb: RGB = RGB {
-        red: 0,
-        green: 0,
-        blue: 0,
-    };
-
     let c = (1.0 - (2.0 * luminance - 1.0).abs()) * saturation;
     let h = hue * 6.0;
     let x = c * (1.0 - (h % 2.0 - 1.0).abs());
     let m = luminance - (c / 2.0);
-    let mut r = 0.0;
-    let mut g = 0.0;
-    let mut b = 0.0;
-    if 0.0 <= h && h <= 1.0 {
-        r = c;
-        g = x;
-        b = 0.0;
-    } else if 1.0 < h && h <= 2.0 {
-        r = x;
-        g = c;
-        b = 0.0;
-    } else if 2.0 < h && h <= 3.0 {
-        r = 0.0;
-        g = c;
-        b = x;
-    } else if 3.0 < h && h <= 4.0 {
-        r = 0.0;
-        g = x;
-        b = c;
-    } else if 4.0 < h && h <= 5.0 {
-        r = x;
-        g = 0.0;
-        b = c;
-    } else if 5.0 < h && h <= 6.0 {
-        r = c;
-        g = 0.0;
-        b = x;
+
+    let i = h.floor() as usize;
+    let mut rgb_table = [c, x, 0.0];
+    if i & 1 == 1 {
+        rgb_table.swap(0, 1);
     }
-    rgb.red = ((r + m) * 255.0) as u8;
-    rgb.green = ((g + m) * 255.0) as u8;
-    rgb.blue = ((b + m) * 255.0) as u8;
-    rgb
+    let (r, g, b) = (
+        rgb_table[(i / 2) % 3],
+        rgb_table[(i / 2 + 1) % 3],
+        rgb_table[(i / 2 + 2) % 3],
+    );
+
+    RGB {
+        red: ((r + m) * 255.0) as u8,
+        green: ((g + m) * 255.0) as u8,
+        blue: ((b + m) * 255.0) as u8,
+    }
 }
