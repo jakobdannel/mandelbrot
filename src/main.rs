@@ -1,5 +1,4 @@
 use std::fs;
-use std::sync::Mutex;
 
 use clap::Parser;
 use image::RgbImage;
@@ -90,9 +89,10 @@ fn generate_image(args: &Args, x_min: f64, x_max: f64, y_min: f64, y_max: f64, i
 
     fs::create_dir_all("./output/").expect("Creating output folder");
 
-    let img = Mutex::new(RgbImage::new(width, height));
-    (0..height).into_par_iter().for_each(|y| {
-        for x in 0..width {
+    let pixels: Vec<((u32, u32), Rgb)> = (0..height)
+        .into_par_iter()
+        .flat_map(|h| (0..width).into_par_iter().map(move |w| (w, h)))
+        .map(|(x, y)| {
             let mut a: f64 = map(x as f64, 0.0, width as f64, x_min, x_max);
             let mut b: f64 = map(y as f64, 0.0, height as f64, y_min, y_max);
             let mut n = 0;
@@ -135,11 +135,15 @@ fn generate_image(args: &Args, x_min: f64, x_max: f64, y_min: f64, y_max: f64, i
                     blue: n,
                 }
             };
-            img.lock().unwrap().put_pixel(x, y, rgb.into());
-        }
-    });
+            ((x, y), rgb)
+        })
+        .collect();
+
+    let mut img = RgbImage::new(width, height);
+    for ((x, y), rgb) in pixels {
+        img.put_pixel(x, y, rgb.into());
+    }
     let outputpath: String = format!("./output/{}.png", img_number);
-    let img = img.into_inner().unwrap();
     img.save(outputpath).expect("Writing image to png");
 }
 
