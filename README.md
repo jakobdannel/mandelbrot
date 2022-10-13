@@ -12,6 +12,7 @@ More information on mandelbrot sets: [Wikipedia](https://en.wikipedia.org/wiki/M
 * Install rust (https://www.rust-lang.org/learn/get-started)
 * Build project with `cargo build --release`
 * Execute file `/targets/release/mandelbrot`
+    - Flag usage: add `-w {} -h {}`, replace `{}` with the desired width and height, `-f {}` to set the amount of frames, and `-c` to make the image colorful 
 * The output is generated as a .png file under `/output`
 
 ## Example images (5000x5000)
