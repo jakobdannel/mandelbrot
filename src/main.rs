@@ -1,6 +1,6 @@
 use std::fs;
 
-use clap::Parser;
+use structopt::{StructOpt};
 use image::RgbImage;
 use rayon::prelude::*;
 
@@ -17,30 +17,35 @@ impl From<Rgb> for image::Rgb<u8> {
     }
 }
 
-#[derive(Parser)]
+#[derive(StructOpt)]
+#[structopt(global_setting = structopt::clap::AppSettings::AllowNegativeNumbers)]
 struct Args {
-    #[arg(long, short, default_value = "5000")]
+    #[structopt(long, short, default_value = "5000")]
     width: u32,
-    #[arg(long, short, default_value = "5000")]
+    #[structopt(long, short, default_value = "5000")]
     height: u32,
-    #[arg(long, short, default_value = "1")]
+    #[structopt(long, short, default_value = "1")]
     frames: usize,
-    #[arg(long, short, default_value = "false")]
+    #[structopt(long, short)]
     colorful: bool,
+    #[structopt(long, default_value = "-0.5")]
+    x_start: f64,//Coordinate x on the mandelbrot set where the zoom starts
+    #[structopt(long, default_value = "0.0")]
+    y_start: f64,//Coordinate y on the mandelbrot set where the zoom starts
+    #[structopt(long, default_value = "-0.5")]
+    x_end: f64,//Coordinate x on the mandelbrot set where the zoom ends
+    #[structopt(long, default_value = "0.0")]
+    y_end: f64,//Coordinate y on the mandelbrot set where the zoom ends
+    #[structopt(long, default_value = "1.0")]
+    zoom_start: f64,//Zoom factor at the start, the smaller the number, the closer it is
+    #[structopt(long, default_value = "1.0")]
+    zoom_end: f64,//Zoom factor at the end
 }
 
 fn main() {
-    let args = Args::parse();
+    let args = Args::from_args();
 
-    let x_start = -0.5; //Coordinate x on the mandelbrot set where the zoom starts
-    let y_start = 0.0; //Coordinate y on the mandelbrot set where the zoom starts
-    let x_end = x_start; //Coordinate x on the mandelbrot set where the zoom ends
-    let y_end = y_start; //Coordinate y on the mandelbrot set where the zoom ends
-
-    let zoom_start = 1.0; //Zoom factor at the start, the smaller the number, the closer it is
-    let zoom_end = zoom_start; //Zoom factor at the end
-
-    generate_zoom(&args, x_start, y_start, x_end, y_end, zoom_start, zoom_end);
+    generate_zoom(&args, args.x_start, args.y_start, args.x_end, args.y_end, args.zoom_start, args.zoom_end);
 }
 
 ///Function that generates a series of images, from a start to an end point with zooms
