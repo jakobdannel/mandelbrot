@@ -1,8 +1,8 @@
 use std::fs;
 
-use structopt::{StructOpt};
 use image::RgbImage;
 use rayon::prelude::*;
+use structopt::StructOpt;
 
 #[derive(Clone, Copy)]
 struct Rgb {
@@ -29,23 +29,31 @@ struct Args {
     #[structopt(long, short)]
     colorful: bool,
     #[structopt(long, default_value = "-0.5")]
-    x_start: f64,//Coordinate x on the mandelbrot set where the zoom starts
+    x_start: f64, //Coordinate x on the mandelbrot set where the zoom starts
     #[structopt(long, default_value = "0.0")]
-    y_start: f64,//Coordinate y on the mandelbrot set where the zoom starts
+    y_start: f64, //Coordinate y on the mandelbrot set where the zoom starts
     #[structopt(long, default_value = "-0.5")]
-    x_end: f64,//Coordinate x on the mandelbrot set where the zoom ends
+    x_end: f64, //Coordinate x on the mandelbrot set where the zoom ends
     #[structopt(long, default_value = "0.0")]
-    y_end: f64,//Coordinate y on the mandelbrot set where the zoom ends
+    y_end: f64, //Coordinate y on the mandelbrot set where the zoom ends
     #[structopt(long, default_value = "1.0")]
-    zoom_start: f64,//Zoom factor at the start, the smaller the number, the closer it is
+    zoom_start: f64, //Zoom factor at the start, the smaller the number, the closer it is
     #[structopt(long, default_value = "1.0")]
-    zoom_end: f64,//Zoom factor at the end
+    zoom_end: f64, //Zoom factor at the end
 }
 
 fn main() {
     let args = Args::from_args();
 
-    generate_zoom(&args, args.x_start, args.y_start, args.x_end, args.y_end, args.zoom_start, args.zoom_end);
+    generate_zoom(
+        &args,
+        args.x_start,
+        args.y_start,
+        args.x_end,
+        args.y_end,
+        args.zoom_start,
+        args.zoom_end,
+    );
 }
 
 ///Function that generates a series of images, from a start to an end point with zooms
@@ -74,10 +82,14 @@ fn generate_zoom(
     let mut y_max;
 
     for i in 0..frames {
-        x_min = x_min_start - ((i as f64 / frames as f64) * (x_min_start - x_min_end));
-        x_max = x_max_start - ((i as f64 / frames as f64) * (x_max_start - x_max_end));
-        y_min = y_min_start - ((i as f64 / frames as f64) * (y_min_start - y_min_end));
-        y_max = y_max_start - ((i as f64 / frames as f64) * (y_max_start - y_max_end));
+        x_min = x_min_start
+            - ((f64::log10(1.0 + (9.0 * (i as f64 / frames as f64)))) * (x_min_start - x_min_end));
+        x_max = x_max_start
+            - ((f64::log10(1.0 + (9.0 * (i as f64 / frames as f64)))) * (x_max_start - x_max_end));
+        y_min = y_min_start
+            - ((f64::log10(1.0 + (9.0 * (i as f64 / frames as f64)))) * (y_min_start - y_min_end));
+        y_max = y_max_start
+            - ((f64::log10(1.0 + (9.0 * (i as f64 / frames as f64)))) * (y_max_start - y_max_end));
         println!("{}", i);
         generate_image(args, x_min, x_max, y_min, y_max, i);
     }
