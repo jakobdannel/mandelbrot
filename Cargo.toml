@@ -9,4 +9,4 @@ edition = "2021"
 clap = { version = "4.5.45", features = ["derive"] }
 image = "0.24.9"
 rayon = "1.11.0"
-structopt = "0.3.26"
+        

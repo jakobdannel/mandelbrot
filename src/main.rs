@@ -1,8 +1,8 @@
 use std::fs;
 
+use clap::Parser;
 use image::RgbImage;
 use rayon::prelude::*;
-use clap::Parser;
 
 #[derive(Clone, Copy)]
 struct Rgb {
