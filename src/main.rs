@@ -2,7 +2,7 @@ use std::fs;
 
 use image::RgbImage;
 use rayon::prelude::*;
-use structopt::StructOpt;
+use clap::Parser;
 
 #[derive(Clone, Copy)]
 struct Rgb {
@@ -17,33 +17,32 @@ impl From<Rgb> for image::Rgb<u8> {
     }
 }
 
-#[derive(StructOpt)]
-#[structopt(global_setting = structopt::clap::AppSettings::AllowNegativeNumbers)]
+#[derive(Parser)]
 struct Args {
-    #[structopt(long, short, default_value = "5000")]
+    #[clap(long, short = 'W', default_value = "5000")]
     width: u32,
-    #[structopt(long, short, default_value = "5000")]
+    #[clap(long, short = 'H', default_value = "5000")]
     height: u32,
-    #[structopt(long, short, default_value = "1")]
+    #[clap(long, short, default_value = "1")]
     frames: usize,
-    #[structopt(long, short)]
+    #[clap(long, short)]
     colorful: bool,
-    #[structopt(long, default_value = "-0.5")]
-    x_start: f64, //Coordinate x on the mandelbrot set where the zoom starts
-    #[structopt(long, default_value = "0.0")]
-    y_start: f64, //Coordinate y on the mandelbrot set where the zoom starts
-    #[structopt(long, default_value = "-0.5")]
-    x_end: f64, //Coordinate x on the mandelbrot set where the zoom ends
-    #[structopt(long, default_value = "0.0")]
-    y_end: f64, //Coordinate y on the mandelbrot set where the zoom ends
-    #[structopt(long, default_value = "1.0")]
-    zoom_start: f64, //Zoom factor at the start, the smaller the number, the closer it is
-    #[structopt(long, default_value = "1.0")]
-    zoom_end: f64, //Zoom factor at the end
+    #[clap(long, default_value = "-0.5", allow_hyphen_values = true)]
+    x_start: f64, // Coordinate x on the mandelbrot set where the zoom starts
+    #[clap(long, default_value = "0.0", allow_hyphen_values = true)]
+    y_start: f64, // Coordinate y on the mandelbrot set where the zoom starts
+    #[clap(long, default_value = "-0.5", allow_hyphen_values = true)]
+    x_end: f64, // Coordinate x on the mandelbrot set where the zoom ends
+    #[clap(long, default_value = "0.0", allow_hyphen_values = true)]
+    y_end: f64, // Coordinate y on the mandelbrot set where the zoom ends
+    #[clap(long, default_value = "1.0")]
+    zoom_start: f64, // Zoom factor at the start, the smaller the number, the closer it is
+    #[clap(long, default_value = "1.0")]
+    zoom_end: f64, // Zoom factor at the end
 }
 
 fn main() {
-    let args = Args::from_args();
+    let args = Args::parse();
 
     generate_zoom(
         &args,
