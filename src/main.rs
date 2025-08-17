@@ -89,7 +89,7 @@ fn generate_zoom(
             - ((f64::log10(1.0 + (9.0 * (i as f64 / frames as f64)))) * (y_min_start - y_min_end));
         y_max = y_max_start
             - ((f64::log10(1.0 + (9.0 * (i as f64 / frames as f64)))) * (y_max_start - y_max_end));
-        println!("{}", i);
+        println!("{i}");
         generate_image(args, x_min, x_max, y_min, y_max, i);
     }
 }
@@ -159,7 +159,7 @@ fn generate_image(args: &Args, x_min: f64, x_max: f64, y_min: f64, y_max: f64, i
     for ((x, y), rgb) in pixels {
         img.put_pixel(x, y, rgb.into());
     }
-    let outputpath: String = format!("./output/{}.png", img_number);
+    let outputpath: String = format!("./output/{img_number}.png");
     img.save(outputpath).expect("Writing image to png");
 }
 
